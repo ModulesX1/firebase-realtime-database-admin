@@ -1,0 +1,16 @@
+{
+  "name": "firebase-realtime-database-admin",
+  "version": "2023.0.1",
+  "description": "module for manage database on firebase realtime database",
+  "main": "index.js",
+  "type": "commonjs",
+  "directories": {
+    "lib": "lib"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "firebase-admin": "^11.9.0"
+  }
+}
