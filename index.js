@@ -15,7 +15,7 @@ class Firebase {
         });
 
         this.insert = util.insert;
-        this.query = util.query;
+        this.fetch = util.query;
     }
 }
 
@@ -39,3 +39,5 @@ const sql = new Firebase({
 sql.query("/members").then( snapshots => {
     snapshots.forEach( console.log )
 })
+
+
