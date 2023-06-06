@@ -4,6 +4,9 @@ dependencies:
   firebase-admin:
     specifier: ^11.9.0
     version: 11.9.0
+  uuid:
+    specifier: ^9.0.0
+    version: 9.0.0
 
 packages:
 
