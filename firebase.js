@@ -1,5 +1,10 @@
+const { v4:uuidv4 } = require("uuid");
 
 const util = {
+    /**
+     * @param { String } Where
+     * @param { Function } Filter
+     **/
     FirebaseFetch: function FirebaseFetch( Where, Filter ) {
         const database = this.database.ref( Where );
         const response = new Array();
@@ -12,20 +17,68 @@ const util = {
                         SnapshotValue[item]['get_firebase_access_key'] = () => item;
                         response.push( SnapshotValue[item] );
                     }
+                    response.exists = true;
                     resove( Filter ? response.filter( Filter ) : response );
                 } else {
+                    response.exists = false;
                     resove( [] );
                 }
-            })
+            }).catch( reject );
         })
     },
+    /**
+     * @param { String } Where
+     * @param { Array } Model
+     **/
     FirebaseSetModel: function FirebaseSetModel( Where, Model ) {
         this.config[Where] = Model;
+        return !0
     },
+    /**
+     * @param { String } Where
+     * @param { {} } Data
+     **/
     FirebaseInsert: function FirebaseInsert( Where, Data ) {
-        
+        const uuid = uuidv4();
+        const table = Where.endsWith("/") ? `${Where}${uuid}` : `${Where}/${uuid}`;
+        const dataModel = this.config[Where];
+        const database = this.database.ref( table );
+        return new Promise( ( resove, reject ) => {
+            if ( typeof Data !== "object" ) resove( false );
+            if ( !dataModel ) {
+                database.set( Data ).then( (res) => {
+                    resove( ( true, res ) );
+                }).catch( reject );
+            } else {
+                const newData = new Object();
+                dataModel.forEach( key => {
+                    newData[key] = Data[key]
+                });
+                database.set( newData ).then( (res) => {
+                    resove( ( true, res ) );
+                }).catch( reject );
+            }
+        });
+    },
+    /**
+     * @param { String } Where
+     * @param { {} } Data
+     **/
+    FirebaseRemove: function FirebaseRemove( Where, Data ) {
+        return new Promise( ( resove, reject ) => {
+            if ( typeof Data === "object" || Data.get_firebase_access_key ) {
+                const table = Where.endsWith("/") ? ( Where + Data.get_firebase_access_key() ) : ( Where + "/" + Data.get_firebase_access_key() );
+                const database = this.database.ref( table );
+                database.remove().then( res => {
+                    resove( ( true, res ) );
+                }).catch( reject );
+            } else {
+                resove( false );
+            }
+        })
     }
 }
+
 
 class Firebase {
 
@@ -46,10 +99,12 @@ class Firebase {
         // use util function
         this.fetch = util.FirebaseFetch;
         this.insert = util.FirebaseInsert;
-
+        this.setModel = util.FirebaseSetModel;
+        this.remove = util.FirebaseRemove;
+        
     }
 }
 
-module.exports = { Firebase }
+module.exports = { Firebase };
 
 //https://www.facebook.com/help/1149694762461553/?helpref=uf_share
