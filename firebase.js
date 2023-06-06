@@ -3,20 +3,27 @@ const util = {
     FirebaseFetch: function FirebaseFetch( Where, Filter ) {
         const database = this.database.ref( Where );
         const response = new Array();
+        if ( typeof Filter !== "function" ) Filter = false;
         return new Promise( ( resove, reject ) => {
             database.get().then( snapshot => {
                 if ( snapshot.exists() ) {
                     const SnapshotValue = snapshot.val();
                     for ( let item in SnapshotValue ) {
-                        SnapshotValue[item]['Firebase_access_key'] = () => item;
+                        SnapshotValue[item]['get_firebase_access_key'] = () => item;
                         response.push( SnapshotValue[item] );
                     }
-                    resove( response );
+                    resove( Filter ? response.filter( Filter ) : response );
                 } else {
                     resove( [] );
                 }
             })
         })
+    },
+    FirebaseSetModel: function FirebaseSetModel( Where, Model ) {
+        this.config[Where] = Model;
+    },
+    FirebaseInsert: function FirebaseInsert( Where, Data ) {
+        
     }
 }
 
@@ -35,9 +42,10 @@ class Firebase {
             databaseURL: init.databaseURL
         });
         this.database = this.firebase.database();
-
+        this.config = new Object();
         // use util function
         this.fetch = util.FirebaseFetch;
+        this.insert = util.FirebaseInsert;
 
     }
 }
